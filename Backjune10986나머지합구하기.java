@@ -1,11 +1,12 @@
 package 구간합;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
 
 public class Backjune10986나머지합구하기 {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
 		StringTokenizer st=new StringTokenizer(br.readLine());
@@ -16,22 +17,22 @@ public class Backjune10986나머지합구하기 {
 		st=new StringTokenizer(br.readLine());
 		int []array=new int[n];
 		for(int i=0;i<n;i++) {
-			array[i]=st.nextToken();
+			array[i]=Integer.parseInt(st.nextToken());
 		}
 		int sum=0;
-		for(int i=1;i<n;i++) {
+		for(int i=1;i<=n;i++) {
 			int []sum_array=new int[n];
 			sum_array[i-1]=array[i-1];
 			for(int j=i;j<n;j++) {
 				sum_array[j]=sum_array[j-1]+array[j];
 			}
-			for(int k=0;k<n;k++) {
+			for(int k=i-1;k<n;k++) {
 				if(sum_array[k]%m==0) {
 					sum+=1;
 				}
 			}
 		}
-		
+		System.out.println(sum);
 		
 	}
 
