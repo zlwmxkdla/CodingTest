@@ -1,0 +1,61 @@
+package 탐색;
+import java.io.*;
+import java.util.*;
+public class Backjune1759암호만들기 {
+	public static int L,C;
+	public static char[] characters;
+	public static boolean[] visited;
+	public static char[]answer;
+	public static void main(String[]args) throws IOException{
+		BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st=new StringTokenizer(bf.readLine());
+		
+		L=Integer.parseInt(st.nextToken());
+		C=Integer.parseInt(st.nextToken());
+		
+		characters=new char[C];
+		visited=new boolean[C];
+		answer=new char[L];
+		st = new StringTokenizer(bf.readLine());
+		for (int i = 0; i < C; i++) {
+            if (st.hasMoreTokens()) {
+                characters[i] = st.nextToken().charAt(0);
+            }
+        }
+		Arrays.sort(characters);
+		dfs(L,C,0,0);
+		
+	}
+	public static void dfs(int L,int C,int depth,int k) {
+		if(depth==L) {
+			//모음, 자음 개수 맞는지 확인 
+			if(check(answer)){
+				for(int i=0;i<L;i++)System.out.print(answer[i]);
+				System.out.println();
+			}
+			
+			return;
+		}
+		
+		for(int i=k;i<C;i++) {
+			if(!visited[i]) {
+				visited[i]=true;
+				answer[depth]=characters[i];
+				//알파벳순으로 하려면 인덱스도 같이 넘겨야 해 
+				dfs(L,C,depth+1,i+1);
+				visited[i]=false;
+			}
+		}
+	}
+	public static boolean check(char []answer) {
+		int num_moeum=0,num_jaeum=0;
+		for(int i=0;i<L;i++) {
+			if(answer[i]=='a'||answer[i]=='i'||answer[i]=='e'||answer[i]=='o'||answer[i]=='u') {
+				num_moeum+=1;
+			}
+		}
+		num_jaeum=L-num_moeum;
+		if(num_moeum==0||num_jaeum<=1)return false;
+		else return true;
+	}
+}
