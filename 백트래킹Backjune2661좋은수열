@@ -1,0 +1,31 @@
+package 탐색;
+import java.util.*;
+
+public class Backjune2661좋은수열 {
+	public static int N;
+	public static void main(String[]args) {
+		Scanner sc=new Scanner(System.in);
+		N=sc.nextInt();
+		backtracking("");
+		sc.close();
+	}
+	
+	public static void backtracking(String st) {
+		if(st.length()==N) {
+			System.out.print(st);
+			System.exit(0);
+		}
+		for(int i=1;i<=3;i++) {
+			if(good(st+i))backtracking(st+i);
+		}
+	}
+	
+	public static boolean good(String str) {
+		for(int i = 1; i <= str.length() / 2; i++) {
+            String front = str.substring(str.length() -i * 2, str.length() - i);
+            String back = str.substring(str.length() - i, str.length());
+            if(front.equals(back)) return false;
+        }
+        return true;
+	}
+}
