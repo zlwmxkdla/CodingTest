@@ -1,0 +1,92 @@
+package 시뮬레이션;
+import java.io.*;
+import java.util.*;
+
+public class Backjune14503로봇청소기 {
+	public static int N,M,start_x,start_y;
+	public static int answer=0;
+	public static int[]dx=new int[]{-1,0,1,0};
+	public static int[]dy=new int[]{0,1,0,-1};
+	public static int[][]arr;
+	public static void main(String[]args) throws IOException{
+		BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st=new StringTokenizer(bf.readLine());
+		
+		N=Integer.parseInt(st.nextToken());
+		M=Integer.parseInt(st.nextToken());
+		arr=new int[N][M];
+		st=new StringTokenizer(bf.readLine());
+		start_x=Integer.parseInt(st.nextToken());
+		start_y=Integer.parseInt(st.nextToken());
+		int direction=Integer.parseInt(st.nextToken());
+		
+		for(int i=0;i<N;i++) {
+			st=new StringTokenizer(bf.readLine());
+			for(int j=0;j<M;j++) {
+				arr[i][j]=Integer.parseInt(st.nextToken());
+			}
+		}
+		
+		while(true) {
+			//1번.현재 위치가 청소되어있지 않은 경우 청소
+			if(arr[start_x][start_y]==0) {
+				arr[start_x][start_y]=2;
+				answer+=1;
+			}
+			//2번. 청소되지 않은 빈칸이 없는 경우
+			int back_x=-1,back_y=-1;
+			if(!neighbor(start_x,start_y)) {
+				
+				switch(direction) {
+				case 0:
+					back_x=start_x+1;
+					back_y=start_y;
+					break;
+				case 1:
+					back_x=start_x;
+					back_y=start_y-1;
+					break;
+				case 2:
+					back_x=start_x-1;
+					back_y=start_y;
+					break;
+				case 3:
+					back_x=start_x;
+					back_y=start_y+1;
+					break;
+				}
+				if(arr[back_x][back_y]==0||arr[back_x][back_y]==2) {//후진 가능하면 후진하기
+					start_x=back_x;
+					start_y=back_y;
+					continue;
+				}
+				else {//후진할 수 없으면 작동 멈춤
+					break;
+				}
+			}
+			//3번. 청소되지 않은 빈칸이 있는 경우
+			if(neighbor(start_x,start_y)) {
+				if(direction==0)direction=3;
+				else direction-=1;
+				//바라보는 방향 기준 앞쪽 칸
+				int new_x=start_x+dx[direction];
+				int new_y=start_y+dy[direction];
+				if(arr[new_x][new_y]==0) {//앞쪽 칸이 청소되지 않은 빈 칸인 경우 한 칸 전진
+					start_x=new_x;
+					start_y=new_y;
+				}
+				continue;//1번으로 돌아간다.
+			}
+		}
+		
+		System.out.print(answer);
+		return;
+	}
+	//벽이 1로 되어있어서 청소기가 구간 내를 벗어나는 경우는 고려하지 않아도 됨
+	public static boolean neighbor(int x,int y) {//주변에 벽인 경우, 이미 청소한 경우, 공간을 벗어나는 경우
+		//주변에 청소되지 않은 빈칸이 없는 경우
+		if((arr[x][y-1]==1||arr[x][y-1]==2)&&(arr[x][y+1]==1||arr[x][y+1]==2)&&(arr[x-1][y]==1||arr[x-1][y]==2)&&(arr[x+1][y]==1||arr[x+1][y]==2))return false;
+		//주변에 청소되지 않은 빈칸이 있는 경우
+		else return true;
+	}
+}
