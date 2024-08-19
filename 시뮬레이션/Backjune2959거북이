@@ -1,0 +1,23 @@
+package 시뮬레이션;
+import java.io.*;
+import java.util.*;
+
+public class Backjune2959거북이 {
+	public static void main(String[]args) throws IOException{
+		BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st=new StringTokenizer(bf.readLine());
+		
+		int arr[]=new int[4];
+		for(int i=0;i<4;i++)arr[i]=Integer.parseInt(st.nextToken());
+		
+		Arrays.sort(arr);
+		int B=arr[0];
+		int D=arr[1];
+		int C=arr[2];
+		int A=arr[3];
+		
+		System.out.println(B*C);
+		
+	}
+
+}
