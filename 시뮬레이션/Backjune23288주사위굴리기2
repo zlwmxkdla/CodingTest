@@ -1,0 +1,138 @@
+package samsung;
+import java.io.*;
+import java.util.*;
+public class Backjune23288주사위굴리기2 {
+
+	public static int N,M,num,answer=0;
+	public static int[][]arr;
+	public static int[][]dice= {{0,2,0},{4,1,3},{0,5,0},{0,6,0}};
+	public static int[]dx= {0,1,0,-1};
+	public static int[]dy= {1,0,-1,0};
+	public static int direct=0;
+	public static int dice_x=1,dice_y=1;
+	
+	public static void main(String[]args) throws IOException{
+		BufferedReader bf=new BufferedReader(new InputStreamReader(System.in));
+		StringTokenizer st=new StringTokenizer(bf.readLine());
+		
+		N=Integer.parseInt(st.nextToken());
+		M=Integer.parseInt(st.nextToken());
+		arr=new int[N+1][M+1];
+		num=Integer.parseInt(st.nextToken());
+		
+		for(int i=1;i<=N;i++) {
+			st=new StringTokenizer(bf.readLine());
+			for(int j=1;j<=M;j++) {
+				arr[i][j]=Integer.parseInt(st.nextToken());
+			}
+		}
+		
+		//주어진 횟수만큼 반복
+		for(int i=0;i<num;i++) {
+			dice_x+=dx[direct];//주사위 굴리기
+			dice_y+=dy[direct];
+			if(dice_x>=1&&dice_y>=1&&dice_x<=N&&dice_y<=M) {//범위 내에 있는 경우
+				int A=getA(direct);//주사위 바닥에 있는 숫자
+				int B=arr[dice_x][dice_y];//주사위가 있는 보드 판의 칸의 숫자
+				
+				//다음 방향 결정
+				if(A>B)direct=(direct+1)%4;
+				else if(A<B) {
+					if(direct==0)direct=3;
+					else {
+						direct=(direct-1)%4;
+					}
+					
+				}
+				
+				int score=0;
+				score=bfs(dice_x,dice_y,B);//칸에 대한 점수 구하기
+				answer+=(B*score);
+				
+			}else {
+				//////////////////////////////////////////////////////////////문제였던 부분
+				////////////////////////////////////
+				//이동할 수 없을 때 방향 바꾸기 전에 이동하기 이전으로 옮기고 
+				//방향 바꾼 후
+				//i-=1해서 다시 위의 반복문 진행하도록 하기
+				dice_x-=dx[direct];
+				dice_y-=dy[direct];
+				direct=(direct+2)%4;//방향 반대로
+				i-=1;
+			}
+		}
+		System.out.println(answer);
+		
+	}
+	
+	public static int bfs(int x,int y,int B) {
+		Queue<int[]> queue=new LinkedList<>();
+		boolean[][]visited=new boolean[N+1][M+1];
+		queue.add(new int[] {x,y});
+		visited[x][y] = true;
+		int answer=1;
+		while(!queue.isEmpty()) {
+			int[] current=queue.poll();
+			int cx=current[0];
+			int cy=current[1];
+			
+			for(int i=0;i<4;i++) {
+				int nx=cx+dx[i];
+				int ny=cy+dy[i];
+				
+				if(nx>=1&&ny>=1&&nx<=N&&ny<=M&&arr[nx][ny]==B&&!visited[nx][ny]) {
+					answer+=1;
+					queue.add(new int[] {nx,ny});
+					
+					visited[nx][ny]=true;
+				}
+			}
+		}
+		
+		return answer;
+	}
+	//굴린 후의 주사위 바닥면의 숫자를 구하고 굴러간 후 주사위 형태를 저장
+	public static int getA(int direct) {
+		int A=0;
+		switch(direct) {
+		case 0://오른쪽으로 이동
+			int temp1=dice[1][2];
+			dice[1][2]=dice[1][1];
+			dice[1][1]=dice[1][0];
+			dice[1][0]=dice[3][1];
+			dice[3][1]=temp1;
+			A=dice[3][1];
+			break;
+			
+		case 1://아래로 이동
+			int temp2=dice[3][1];
+			dice[3][1]=dice[2][1];
+			dice[2][1]=dice[1][1];
+			dice[1][1]=dice[0][1];
+			dice[0][1]=temp2;
+			A=dice[3][1];
+			break;
+		
+		case 2://왼쪽으로 이동
+			int temp3=dice[1][0];
+			dice[1][0]=dice[1][1];
+			dice[1][1]=dice[1][2];
+			dice[1][2]=dice[3][1];
+			dice[3][1]=temp3;
+			A=dice[3][1];
+			break;
+			
+		case 3://위로 이동
+			int temp4=dice[0][1];
+			dice[0][1]=dice[1][1];
+			dice[1][1]=dice[2][1];
+			dice[2][1]=dice[3][1];
+			dice[3][1]=temp4;
+			A=dice[3][1];
+			break;
+		default:
+			break;
+		}
+		return A;
+	}
+}
