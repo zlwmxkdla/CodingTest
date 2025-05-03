@@ -1,34 +1,36 @@
+
 import java.util.*;
 public class Main {
-	static int n;
-	static int[]board;
-	static int answer=0;
-	public static void main(String[]args) {
-		Scanner sc = new Scanner(System.in);
-		n=sc.nextInt();
-		board = new int[n];
-		NQueen(0);//첫 번째 행부터 시작
-		System.out.println(answer);
-		sc.close();
-	}
-	public static void NQueen(int row) {
-		if(row==n) {
-			//모든 행에 퀸을 놓았을 경우
-			answer+=1;
-			return;
-		}
-		for(int i=0;i<n;i++) {//현재 행의 각 열을 시도
-			board[row]=i;
-			if(isPromising(row)) {
-				NQueen(row+1);
-			}
-		}
-	}
-	public static boolean isPromising(int row) {
-		for(int i=0;i<row;i++) {
-			//같은 열에 있거나 대각선에 있는 경우
-			if(board[i]==board[row]||Math.abs(board[i]-board[row])==Math.abs(i-row))return false;
-		}
-		return true;
-	}
+	static int N;
+    static int answer = 0;
+    static boolean[] cols;     // 열
+    static boolean[] diag1;    // ↘ 대각선 (row + col)
+    static boolean[] diag2;    // ↙ 대각선 (row - col + N)
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt();
+        cols = new boolean[N];
+        diag1 = new boolean[2 * N]; 
+        diag2 = new boolean[2 * N];
+
+        dfs(0);
+        System.out.println(answer);
+        sc.close();
+    }
+
+    static void dfs(int row) {
+        if (row == N) {
+            answer++;
+            return;
+        }
+
+        for (int col = 0; col < N; col++) {
+            if (cols[col] || diag1[row + col] || diag2[row - col + N]) continue;
+
+            cols[col] = diag1[row + col] = diag2[row - col + N] = true;
+            dfs(row + 1);
+            cols[col] = diag1[row + col] = diag2[row - col + N] = false;
+        }
+    }
 }
