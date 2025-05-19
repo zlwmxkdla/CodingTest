@@ -1,119 +1,99 @@
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 class Solution {
-    static int size;
-	static int[][] map;
-	static int[] dx= {-1,1,0,0};
-	static int[] dy= {0,0,-1,1};
+    
     public int solution(int[][] board) {
         int answer = 0;
-        size = board.length;	
-        map = board;
-        answer =  bfs();
+        Queue<Robot> q = new LinkedList<>();
+        int[] dr = {0, 0, 1, -1};
+        int[] dc = {1, -1, 0, 0};
+        
+        int len = board.length;
+        boolean[][][] visited = new boolean[len][len][2];
+        
+        q.add(new Robot(new Point(0, 0), new Point(0, 1), 0, 0));
+        
+        while(!q.isEmpty()){
+            Robot ro = q.poll();
+            
+            //범위를 벗어나는 경우
+            if(ro.p1.r<0 || ro.p1.c<0 || ro.p1.r>=len || ro.p1.c>=len || 
+            ro.p2.r<0 || ro.p2.c<0 || ro.p2.r>=len || ro.p2.c>=len) continue;
+        
+            //벽인 경우
+            if(board[ro.p1.r][ro.p1.c]==1 || board[ro.p2.r][ro.p2.c]==1) continue;
+            
+            //이미 방문한 경우
+            if(visited[ro.p1.r][ro.p1.c][ro.vertical] && visited[ro.p2.r][ro.p2.c][ro.vertical]) continue;
+            
+            //종료 조건
+            if((ro.p1.r==len-1 && ro.p1.c==len-1) || 
+              (ro.p2.r==len-1 && ro.p2.c==len-1)) {
+                answer = ro.t;
+                break;
+            }
+            
+            visited[ro.p1.r][ro.p1.c][ro.vertical] = true;
+            visited[ro.p2.r][ro.p2.c][ro.vertical] = true;
+
+            
+            for(int i = 0; i < 4; i++){
+                int nr1 = ro.p1.r+dr[i];
+                int nr2 = ro.p2.r+dr[i];
+                int nc1 = ro.p1.c+dc[i];
+                int nc2 = ro.p2.c+dc[i];
+        
+                q.add(new Robot(new Point(nr1, nc1), new Point(nr2, nc2), ro.t+1, ro.vertical));
+            }
+            
+            //회전시키기
+            if(ro.vertical==1){
+                //수직인 경우, 좌우 2칸 확인
+                if(ro.p1.c-1>=0 && board[ro.p1.r][ro.p1.c-1]==0 && board[ro.p2.r][ro.p2.c-1]==0){
+                    q.add(new Robot(new Point(ro.p1.r, ro.p1.c), new Point(ro.p1.r, ro.p2.c-1), ro.t+1, 0));
+                    q.add(new Robot(new Point(ro.p2.r, ro.p1.c-1), new Point(ro.p2.r, ro.p2.c), ro.t+1, 0));
+                }
+                if(ro.p1.c+1<len && board[ro.p1.r][ro.p1.c+1]==0 && board[ro.p2.r][ro.p2.c+1]==0){
+                    q.add(new Robot(new Point(ro.p1.r, ro.p1.c), new Point(ro.p1.r, ro.p2.c+1), ro.t+1, 0));
+                    q.add(new Robot(new Point(ro.p2.r, ro.p1.c+1), new Point(ro.p2.r, ro.p2.c), ro.t+1, 0));
+                }
+            }
+            else{
+                //수평인 경우, 상하 2칸 확인
+                if(ro.p1.r-1>=0 && board[ro.p1.r-1][ro.p1.c]==0 && board[ro.p2.r-1][ro.p2.c]==0){
+                    q.add(new Robot(new Point(ro.p1.r-1, ro.p2.c), new Point(ro.p2.r, ro.p2.c), ro.t+1, 1));
+                    q.add(new Robot(new Point(ro.p1.r, ro.p1.c), new Point(ro.p2.r-1, ro.p1.c), ro.t+1, 1));
+                    
+                }
+                if(ro.p1.r+1<len && board[ro.p1.r+1][ro.p1.c]==0 && board[ro.p2.r+1][ro.p2.c]==0){
+                    q.add(new Robot(new Point(ro.p1.r+1, ro.p2.c), new Point(ro.p2.r, ro.p2.c), ro.t+1, 1));   
+                    q.add(new Robot(new Point(ro.p1.r, ro.p1.c), new Point(ro.p2.r+1, ro.p1.c), ro.t+1, 1));   
+                }
+            }
+            
+        }
+ 
         return answer;
     }
-	
-	static int bfs() {
-		Queue<Robot> q = new LinkedList<>();
-		boolean[][][] check = new boolean[size][size][2];
-		q.add(new Robot(0,0,1,0,0,0));
-		
-		while(!q.isEmpty()) {
-			Robot robot = q.poll();
-			int pbx = robot.bx, pby =robot.by;
-			int pfx = robot.fx, pfy =robot.fy;
-			int pStatus = robot.status;
-			int mv = robot.move;
-			
-			if(check[pby][pbx][pStatus] && check[pfy][pfx][pStatus]) continue;
-			check[pby][pbx][pStatus] = true;
-			check[pfy][pfx][pStatus] = true;
-			
-			if((pbx == size-1 && pby==size-1)
-					|| (pfx == size-1 && pfy==size-1)) {
-				return mv;
-			}
-			// 1. 상하좌우 이동 
-			for(int d=0; d<4; d++) {
-				int nbx = pbx+dx[d];
-				int nby = pby+dy[d];
-				int nfx = pfx+dx[d];
-				int nfy = pfy+dy[d];
-				
-				if(graphCondition(nbx, nby, nfx, nfy)) {
-						q.add(new Robot(nbx, nby, nfx, nfy, pStatus, mv+1));
-				}
-			}
-			
-			
-			// 2. 90도 회전
-			// 로봇 가로 상태
-			if(pStatus==0) {
-				// 위로 회전 
-				if(graphCondition(pbx, pby-1, pfx, pfy-1)) {
-						// 앞축고정 회전(위로 90)
-						q.add(new Robot(pfx, pfy, pfx, pfy-1, 1, mv+1));
-						// 뒤축고정 회전(위로 90)
-						q.add(new Robot(pbx, pby, pbx, pby-1, 1, mv+1));
-				}
-				
-				// 아래로 회전 
-				if(graphCondition(pbx, pfy+1, pfx, pfy+1)) {
-						// 앞축고정 회전(아래로 90)
-						q.add(new Robot(pfx, pfy, pfx, pfy+1, 1, mv+1));
-						// 뒤축고정 회전(아래로 90)
-						q.add(new Robot(pbx, pby, pbx, pby+1, 1, mv+1));
-				}
-				
-			}
-			// 로봇 세로 상태
-			else if(pStatus==1) {
-				// 오른쪽 회전 
-				if(graphCondition(pbx+1, pby, pfx+1, pfy)) {
-					// 앞축고정 회전 (오른쪽 90)
-						q.add(new Robot(pfx, pfy, pfx+1, pfy, 0, mv+1));
-						// 뒤축고정 회전 (오른쪽 90)
-						q.add(new Robot(pbx, pby, pbx+1, pby, 0, mv+1));
-				}
-				
-				// 왼쪽 회전 
-				if(graphCondition(pbx-1, pby, pfx-1, pfy)) {
-						// 앞축고정 회전 (왼쪽 90)
-						q.add(new Robot(pfx, pfy, pfx-1, pfy, 0, mv+1));
-						// 뒤축고정 회전 (왼쪽  90)
-						q.add(new Robot(pbx, pby, pbx-1, pby, 0, mv+1));
-				}
-				
-			}
-		}
-		return -1;
-	}
-	
-	
-	static boolean graphCondition(int x1, int y1, int x2, int y2) {
-		if(x1 <0 || x2 <0 || x1>size-1 || x2>size-1
-				|| y1<0 || y2<0 || y1>size-1 || y2>size-1
-				|| map[y1][x1] ==1 || map[y2][x2] ==1) return false;
-		
-		return true;
-	}
-	
-	static class Robot{
-		int bx;
-		int by;
-		int fx;
-		int fy;
-		int status; // 0 가로, 1 세로 
-		int move;
-		
-		public Robot(int bx, int by, int fx, int fy, int status, int move) {
-			this.bx = bx;
-			this.by = by;
-			this.fx = fx;
-			this.fy = fy;
-			this.status = status;
-			this.move = move;
-		}
-	}
+    
+    class Robot{
+        Point p1; 
+        Point p2;
+        int t;
+        int vertical;
+        Robot(Point p1, Point p2, int t, int vertical){
+            this.p1 = p1;
+            this.p2 = p2;
+            this.t = t;
+            this.vertical = vertical;
+        }
+    }
+    
+    class Point{
+        int r, c;
+        Point(int r, int c){
+            this.r = r;
+            this.c = c;
+        }
+    }
 }
