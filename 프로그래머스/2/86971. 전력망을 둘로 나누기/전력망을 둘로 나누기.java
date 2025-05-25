@@ -1,48 +1,58 @@
 import java.util.*;
+
 class Solution {
-    static int [][]arr;
+    static List<List<Integer>> list = new ArrayList<>();
+    static boolean[] visited;
+    static int sub1;
+
     public int solution(int n, int[][] wires) {
         int answer = Integer.MAX_VALUE;
-        //인접 리스트보다는 인접 행렬이 데이터를 다루기에 더 용이함
-        arr = new int[n+1][n+1];
-        for(int i=0;i<wires.length;i++){
-            arr[wires[i][0]][wires[i][1]]=1;
-            arr[wires[i][1]][wires[i][0]]=1;
+
+        // 리스트 초기화
+        for (int i = 0; i < n; i++) {
+            list.add(new ArrayList<>());
         }
-        
-        for(int i=0;i<wires.length;i++){
-            //제거할 송전탑 a와 b
-            int a = wires[i][0];
-            int b = wires[i][1];
-            arr[a][b]=0;//두 송전탑의 연결 끊어버리기
-            arr[b][a]=0;
-            
-            answer = Math.min(answer,bfs(n,a));
-            
-            arr[a][b]=1;
-            arr[b][a]=1; //연결 상태 복귀
+
+        // 그래프 구성
+        for (int[] wire : wires) {
+            int from = wire[0] - 1;
+            int to = wire[1] - 1;
+            list.get(from).add(to);
+            list.get(to).add(from);
         }
+
+        // 전선 하나씩 끊어보며 최소 차이 탐색
+        for (int[] wire : wires) {
+            int from = wire[0] - 1;
+            int to = wire[1] - 1;
+
+            // 전선 끊기
+            list.get(from).remove(Integer.valueOf(to));
+            list.get(to).remove(Integer.valueOf(from));
+
+            // 차이 계산
+            visited = new boolean[n];
+            sub1 = 1;
+            visited[from] = true;
+            dfs(from);
+            int sub2 = n - sub1;
+            answer = Math.min(answer, Math.abs(sub1 - sub2));
+
+            // 다시 연결
+            list.get(from).add(to);
+            list.get(to).add(from);
+        }
+
         return answer;
     }
-    public static int bfs(int n, int start){
-        int group1 = 1;
-        boolean[]visited = new boolean[n+1];
-        visited[start]=true;
-        Queue<Integer> q = new LinkedList<>();
-        q.add(start);
-        
-        while(!q.isEmpty()){
-            int now = q.poll();
-            for (int i = 1; i <= n; i++) {
-                if (arr[now][i] == 1 && !visited[i]) {
-                    visited[i] = true;
-                    q.add(i);
-                    group1++;
-                }
+
+    public void dfs(int node) {
+        for (int next : list.get(node)) {
+            if (!visited[next]) {
+                visited[next] = true;
+                sub1++;
+                dfs(next);
             }
         }
-        int group2 = n - group1;
-        return Math.abs(group1-group2);
-        
     }
 }
