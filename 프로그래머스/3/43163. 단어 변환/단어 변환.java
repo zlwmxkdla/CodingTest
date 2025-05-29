@@ -1,42 +1,37 @@
 import java.util.*;
 class Solution {
     class wordstats{
-        int num;
-        String s;
-        wordstats(int num,String s){
-            this.num=num;
-            this.s=s;
+        int cnt;
+        String word;
+        wordstats(int cnt,String word){
+            this.cnt=cnt;
+            this.word=word;
         }
     }
     public int solution(String begin, String target, String[] words) {
         int answer = 0;
-        
         boolean[]visited = new boolean[words.length];
         Queue<wordstats> q = new LinkedList<>();
         q.add(new wordstats(0,begin));
-        //visited[0]=true;//begin 단어는 시작점에 없음
         
         while(!q.isEmpty()){
             wordstats now = q.poll();
-            if(now.s.equals(target))return now.num;
-            
+            if(now.word.equals(target))return now.cnt;
             for(int i=0;i<words.length;i++){
-                if(!visited[i]&&canchange(now.s,words[i])){
+                if(!visited[i]&&canchange(words[i],now.word)){
                     visited[i]=true;
-                    q.add(new wordstats(now.num+1,words[i]));
-                    
+                    q.add(new wordstats(now.cnt+1,words[i]));
                 }
             }
-            
         }
         return answer;
     }
-    public static boolean canchange(String a, String b){
-        int count = 0;
+    public static boolean canchange(String a,String b){
+        int cnt = 0;
         for(int i=0;i<a.length();i++){
-            if(a.charAt(i)!=b.charAt(i))count+=1;
+            if(a.charAt(i)!=b.charAt(i))cnt++;
         }
-        if(count==1)return true;
+        if(cnt==1)return true;
         else return false;
     }
 }
