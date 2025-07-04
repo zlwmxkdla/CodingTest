@@ -1,55 +1,58 @@
 import java.util.*;
 class Solution {
     public int solution(String[][] relation) {
-        int answer = 0;
-        int colsize = relation[0].length;//열의 개수
+        int colsize = relation[0].length;
         List<Set<Integer>> candidates = new ArrayList<>();
-        
-        //1~n 개의 길이의 조합 생성하기
+  
+        //1개부터 n개까지의 조합 만들기
         for(int size=1;size<=colsize;size++){
-            List<Set<Integer>> combinations = generateCombinations(size,colsize);//만들어질 수 있는 후보키 조합들
-            for(Set<Integer> comb:combinations){//각 조합에 대하여
-                if(checkUnique(comb,relation)&&checkMin(comb,candidates)){//유일성과 최소성을 만족하는지 조사
+            List<Set<Integer>> combinations = new ArrayList<>();
+            combinations = generateCombinations(colsize,size);
+            for(Set<Integer> comb:combinations){
+                if(checkUnique(comb,relation)&&checkMin(comb,candidates)){
                     candidates.add(comb);
                 }
             }
         }
+        
         return candidates.size();
     }
-    private boolean checkUnique(Set<Integer> comb,String[][]relation){
-        Set<String> tuples = new HashSet<>();
+    private boolean checkUnique(Set<Integer> cand, String[][]relation){
         int len = relation.length;
-        for(int i=0;i<len;i++){
+        Set<String> rowSet = new HashSet<>();
+        for(String[] row:relation){
             StringBuilder sb = new StringBuilder();
-            for(int e:comb){
-                sb.append(relation[i][e]);
+            for(int i:cand){
+                sb.append(row[i]);
             }
-            tuples.add(sb.toString());
+            rowSet.add(sb.toString());
         }
-        if(tuples.size()==len)return true;
+        if(rowSet.size()==len)return true;
         return false;
     }
-    private boolean checkMin(Set<Integer> comb, List<Set<Integer>> candidates){
-        for(Set<Integer> s:candidates){
-            if(comb.containsAll(s))return false;
+    
+    private boolean checkMin(Set<Integer> cand, List<Set<Integer>> candidates){
+        for(Set<Integer> key:candidates){
+            if(cand.containsAll(key))return false;
+            
         }
         return true;
     }
-    private List<Set<Integer>> generateCombinations(int size, int colsize){
-        List<Set<Integer>> combs = new ArrayList<>();
-        generateCombhelper(0,size,combs,new HashSet<>(),colsize);
-        return combs;
+    private List<Set<Integer>> generateCombinations(int colsize,int size){
+        List<Set<Integer>> result = new ArrayList<>();
+        generateCombHelper(0,size,colsize,result,new HashSet<>());
+        return result;
     }
     
-    private void generateCombhelper(int start, int size, List<Set<Integer>>result,Set<Integer> set,int colsize){
-        if(set.size()==size){
-            result.add(new HashSet<>(set));
+    private void generateCombHelper(int start,int size,int colsize,List<Set<Integer>> result, Set<Integer> current){
+        if(current.size()==size){
+            result.add(new HashSet<>(current));
             return;
         }
         for(int i=start;i<colsize;i++){
-            set.add(i);
-            generateCombhelper(start+1,size,result,set,colsize);
-            set.remove(i);
+            current.add(i);
+            generateCombHelper(start+1,size,colsize,result,current);
+            current.remove(i);
         }
     }
 }
