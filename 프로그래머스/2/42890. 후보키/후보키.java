@@ -1,63 +1,55 @@
 import java.util.*;
-
 class Solution {
     public int solution(String[][] relation) {
-        int row = relation.length;
-        int col = relation[0].length;
-        List<Set<Integer>> candidateKeys = new ArrayList<>();
-
-        // 1. 가능한 모든 컬럼 조합을 생성 (비트마스킹 사용)
-        for (int i = 1; i < (1 << col); i++) {
-            Set<String> tuples = new HashSet<>();
-
-            for (int r = 0; r < row; r++) {
-                StringBuilder sb = new StringBuilder();
-                for (int c = 0; c < col; c++) {
-                    if ((i & (1 << c)) != 0) {
-                        sb.append(relation[r][c]).append(",");
-                    }
-                }
-                tuples.add(sb.toString());
-            }
-
-            // 2. 유일성 검사
-            if (tuples.size() == row) {
-                // 3. 최소성 검사
-                boolean isMinimal = true;
-                for (Set<Integer> key : candidateKeys) {
-                    if ((i & toBitmask(key)) == toBitmask(key)) {
-                        isMinimal = false;
-                        break;
-                    }
-                }
-
-                // 후보키로 등록
-                if (isMinimal) {
-                    candidateKeys.add(toSet(i, col));
+        int answer = 0;
+        int colsize = relation[0].length;//열의 개수
+        List<Set<Integer>> candidates = new ArrayList<>();
+        
+        //1~n 개의 길이의 조합 생성하기
+        for(int size=1;size<=colsize;size++){
+            List<Set<Integer>> combinations = generateCombinations(size,colsize);//만들어질 수 있는 후보키 조합들
+            for(Set<Integer> comb:combinations){//각 조합에 대하여
+                if(checkUnique(comb,relation)&&checkMin(comb,candidates)){//유일성과 최소성을 만족하는지 조사
+                    candidates.add(comb);
                 }
             }
         }
-
-        return candidateKeys.size();
+        return candidates.size();
     }
-
-    // 비트마스크를 Set으로 변환
-    private Set<Integer> toSet(int bitmask, int col) {
-        Set<Integer> set = new HashSet<>();
-        for (int i = 0; i < col; i++) {
-            if ((bitmask & (1 << i)) != 0) {
-                set.add(i);
+    private boolean checkUnique(Set<Integer> comb,String[][]relation){
+        Set<String> tuples = new HashSet<>();
+        int len = relation.length;
+        for(int i=0;i<len;i++){
+            StringBuilder sb = new StringBuilder();
+            for(int e:comb){
+                sb.append(relation[i][e]);
             }
+            tuples.add(sb.toString());
         }
-        return set;
+        if(tuples.size()==len)return true;
+        return false;
     }
-
-    // Set을 비트마스크로 변환
-    private int toBitmask(Set<Integer> set) {
-        int bitmask = 0;
-        for (int i : set) {
-            bitmask |= (1 << i);
+    private boolean checkMin(Set<Integer> comb, List<Set<Integer>> candidates){
+        for(Set<Integer> s:candidates){
+            if(comb.containsAll(s))return false;
         }
-        return bitmask;
+        return true;
+    }
+    private List<Set<Integer>> generateCombinations(int size, int colsize){
+        List<Set<Integer>> combs = new ArrayList<>();
+        generateCombhelper(0,size,combs,new HashSet<>(),colsize);
+        return combs;
+    }
+    
+    private void generateCombhelper(int start, int size, List<Set<Integer>>result,Set<Integer> set,int colsize){
+        if(set.size()==size){
+            result.add(new HashSet<>(set));
+            return;
+        }
+        for(int i=start;i<colsize;i++){
+            set.add(i);
+            generateCombhelper(start+1,size,result,set,colsize);
+            set.remove(i);
+        }
     }
 }
