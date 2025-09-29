@@ -1,42 +1,54 @@
 class Solution {
     public int solution(String name) {
         int answer = 0;
-    int n = name.length();
-    
-    // 1. 상하 이동 횟수 계산 (Vertical Moves)
-    for (int i = 0; i < n; i++) {
-        char c = name.charAt(i);
-        // A와 Z 중 더 가까운 쪽의 이동 횟수를 더함
-        answer += Math.min(c - 'A', 'Z' - c + 1); 
-    }
-    
-    // 2. 최소 좌우 이동 횟수 계산 (Horizontal Moves)
-    int min_move = n - 1; // 초기값: 오른쪽으로 쭉 가는 경우 (N-1)
-    
-    // 0번 인덱스부터 시작해서 모든 지점 i를 '오른쪽 이동의 끝'으로 가정
-    for (int i = 0; i < n; i++) {
-        
-        // i 이후의 연속된 'A'가 끝나는 지점 j를 찾음
-        int next_non_A = i + 1;
-        while (next_non_A < n && name.charAt(next_non_A) == 'A') {
-            next_non_A++;
+        // 상하로 이동하는 횟수 구하기
+        for(int i=0;i<name.length();i++){
+            char now = name.charAt(i);
+            if(now<=78)answer+=(now-65);
+            else answer+=(91-now);
+        }
+        // 좌우로 이동하는 횟수 구하기
+        // 정방향 이동하는 경우
+        int right = 0;
+        for(int i=name.length()-1;i>0;i--){
+            if(name.charAt(i)!='A'){
+                right=i;
+                break;
+            }
         }
         
-        // Case 1: 오른쪽으로 i만큼 갔다가 (i), 다시 돌아와 (i),
-        //         남은 뒷부분을 왼쪽으로 처리 (n - next_non_A)
-        int move_back = i * 2 + (n - next_non_A);
         
-        // Case 2: 왼쪽으로 먼저 갔다가 (n - next_non_A), 다시 돌아와 (n - next_non_A),
-        //         앞부분을 오른쪽으로 처리 (i)
-        int move_forward = (n - next_non_A) * 2 + i;
+        int left = 0;
+        for(int i=0;i<name.length();i++){
+            if(name.charAt(i)!='A'){
+                left = name.length()-i;
+                break;
+            }
+        }
         
-        // 현재 i 지점을 기준으로 최소 경로 업데이트
-        min_move = Math.min(min_move, move_back);
-        min_move = Math.min(min_move, move_forward);
+        int both=Integer.MAX_VALUE;
+        
+        for(int end=0;end<name.length();end++){
+            int cnt = 0;
+            int rcnt=0;
+            int nextA = name.length();
+            for(int j=end+1;j<name.length();j++){
+                if(name.charAt(j)!='A'){
+                    nextA=j;
+                    break;
+                }
+            }
+            if(nextA==name.length()){
+                both = Math.min(both,end*2);
+                continue;
+            }
+            cnt+=(end*2);
+            cnt+=(name.length()-nextA);
+            rcnt+=((name.length()-nextA)*2);
+            rcnt+=end;
+            both = Math.min(both,Math.min(cnt,rcnt));
+        }
+        
+        return answer+=Math.min(right,Math.min(left,both));
     }
-    
-    answer += min_move;
-    return answer;
-    }
-    
 }
