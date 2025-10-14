@@ -1,46 +1,44 @@
+import java.util.*;
+
 class Solution {
     public int solution(int[] queue1, int[] queue2) {
-        int answer = 0;
-        long q1sum=0,q2sum=0;
-        for(int i=0;i<queue1.length;i++){
-            q1sum+=queue1[i];
-            q2sum+=queue2[i];
+        Queue<Integer> q1 = new LinkedList<>();
+        Queue<Integer> q2 = new LinkedList<>();
+
+        long sum1 = 0, sum2 = 0;
+        for (int n : queue1) {
+            q1.add(n);
+            sum1 += n;
         }
-        if((q1sum+q2sum)%2==1)return -1;
-        long goal = (q1sum+q2sum)/2;
-        int n = queue1.length;
-        int m = queue2.length;
-        
-        int []total = new int[2*(n+m)];
-        
-        for(int i=0;i<n;i++)total[i]=queue1[i];
-        int index = 0;
-        for(int i=n;i<n+m;i++)total[i]=queue2[index++];
-        for(int i=n+m;i<total.length;i++)total[i]=total[i-(n+m)];
-        
-        
-        
-        int start = 0;
-        int end = n-1;
-        while(true){
-            if(start==2*(n+m)-1||end==2*(n+m)-1){
-                answer=-1;
-                break;
+        for (int n : queue2) {
+            q2.add(n);
+            sum2 += n;
+        }
+
+        long total = sum1 + sum2;
+        if (total % 2 == 1) return -1; // 합이 홀수면 불가능
+        long target = total / 2;
+
+        int maxOps = (queue1.length + queue2.length) * 2; // 무한루프 방지용
+        int cnt = 0;
+
+        while (cnt <= maxOps) {
+            if (sum1 == target) return cnt;
+
+            if (sum1 > target) {
+                int num = q1.poll();
+                sum1 -= num;
+                sum2 += num;
+                q2.add(num);
+            } else {
+                int num = q2.poll();
+                sum2 -= num;
+                sum1 += num;
+                q1.add(num);
             }
-            if(q1sum<goal){
-                end=(end+1)%total.length;
-                answer+=1;
-                q2sum-=total[end];
-                q1sum+=total[end];
-            }else if(q1sum>goal){
-                answer+=1;
-                q1sum-=total[start];
-                q2sum+=total[start];
-                start+=1;
-            }else break;
-            
+            cnt++;
         }
-        
-        return answer;
+
+        return -1;
     }
 }
